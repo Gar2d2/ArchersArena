@@ -4,13 +4,11 @@ using UnityEngine;
 
 public class SpawnPoint : MonoBehaviour
 {
-    [SerializeField]
-    SpawnManager m_spawnManager;
     void Start()
     {
-        if(m_spawnManager != null)
+        if (SpawnManager.instance != null)
         {
-            m_spawnManager.RegisterSpawnPoint(this);
+            SpawnManager.instance.RegisterSpawnPoint(this);
         }
     }
 }
