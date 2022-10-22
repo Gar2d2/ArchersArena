@@ -5,6 +5,7 @@ using UnityEngine.InputSystem.Utilities;
 using UnityEngine.InputSystem;
 using System.Linq;
 using Unity.VisualScripting;
+using static UnityEngine.InputSystem.InputAction;
 
 public class SpawnManager : MonoBehaviour
 {
@@ -28,6 +29,18 @@ public class SpawnManager : MonoBehaviour
         m_keyboardToSet = Keyboard.current;
         m_mouseToSet = Mouse.current;
         m_allGamepads = Gamepad.all.ToList<Gamepad>();
+
+        foreach(var gamepad in m_allGamepads)
+        {
+            var joinGame = new InputAction("join");
+            joinGame.AddBinding(gamepad.aButton);
+            joinGame.performed += HandleGamepadInput;
+            joinGame.Enable();
+        }
+        var joinGameKeyboard = new InputAction("joinKb");
+        joinGameKeyboard.AddBinding(m_keyboardToSet.spaceKey);
+        joinGameKeyboard.performed += HandleKeyboardInput;
+        joinGameKeyboard.Enable();
     }
     void Awake()
     {
@@ -43,63 +56,29 @@ public class SpawnManager : MonoBehaviour
         QualitySettings.vSyncCount = 0;  // VSync must be disabled
         Application.targetFrameRate = 60;
     }
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.anyKeyDown)
-        {
-            if(m_keyboardToSet != null && m_mouseToSet != null)
-            {
-                if(HandleKeyboardInput())
-                {
-                    m_keyboardToSet = null;
-                    m_mouseToSet = null;
-                }
-            }
-            foreach (var gamepad in m_allGamepads)
-            {
-               
-                if(HandleGamepadInput(gamepad))
-                {
-                    break;
-                }
-            }
-        }
-    }
+  
 
-    private bool HandleGamepadInput(Gamepad gamepad)
+    private void HandleGamepadInput(CallbackContext ctx)
     {
-        if (!gamepad.aButton.IsPressed())
-        {
-            return false;
-        }
+
         var player = Instantiate(m_playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
         var moveComp = player.GetComponent<PlayerMove>();
         if (moveComp)
         {
-            moveComp.m_playerGamepad = gamepad;
-            m_allGamepads.Remove(gamepad);
-            return true;
+            moveComp.m_playerGamepad = (Gamepad)ctx.control.device;
+            ctx.action.ChangeBinding(0).Erase();
         }
-        
-        return false;
     }
-    private bool HandleKeyboardInput()
+    private void HandleKeyboardInput(CallbackContext ctx)
     {
-        if(!m_keyboardToSet.spaceKey.isPressed)
-        {
-            return false;
-        }
         var player = Instantiate(m_playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
         var moveComp = player.GetComponent<PlayerMove>();
-        if (moveComp)
+        if (moveComp && m_keyboardToSet != null && m_mouseToSet != null)
         {
             moveComp.m_playerKeyboard = m_keyboardToSet;
             moveComp.m_playerMouse = m_mouseToSet;
-            return true;
+            ctx.action.ChangeBinding(0).Erase();
         }
-
-        return false;
     }
     private Vector2 GetRandomSpawnPosition()
     {
