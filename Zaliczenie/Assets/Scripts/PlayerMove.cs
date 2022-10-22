@@ -1,24 +1,23 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEditor.U2D.Path.GUIFramework;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Utilities;
-using static System.Collections.Specialized.BitVector32;
-using static UnityEngine.GraphicsBuffer;
+
 using static UnityEngine.InputSystem.InputAction;
 
 public class PlayerMove : MonoBehaviour
 {
-
     public Gamepad m_playerGamepad { get; set; }
     public Mouse m_playerMouse { get; set; }
     public Keyboard m_playerKeyboard { get; set; }
-
+    private Animator m_Animator;
     private bool bIsWalking = false;
+    private bool bIsJumping = false;
     public float m_playerSpeed = 1.0f;
     private InputAction m_accelerateAction = new InputAction();
     private Rigidbody2D m_rigidbody;    
@@ -37,6 +36,7 @@ public class PlayerMove : MonoBehaviour
         m_accelerateAction.canceled += EndWalk;
         m_accelerateAction.Enable();
         m_rigidbody = GetComponent<Rigidbody2D>();
+        m_Animator = GetComponent<Animator>();
     }
 
     private void MapGamepad()
@@ -66,7 +66,13 @@ public class PlayerMove : MonoBehaviour
     }
     void Jump()
     {
-        m_rigidbody.AddForce(new Vector2(0.0f, 5.0f), ForceMode2D.Impulse);
+        var colider = GetComponent<Collider2D>();
+        if (colider == null || Physics2D.BoxCastAll(colider.bounds.center, colider.bounds.size, 0f, Vector2.down, 0.1f).Length <= 1)
+        {
+            return;
+        }
+        m_rigidbody.AddForce(new Vector2(0.0f, 7.0f), ForceMode2D.Impulse);
+        m_Animator.SetBool("bIsJumping", true);
     }
     void Walk(CallbackContext ctx)
     {
@@ -78,24 +84,28 @@ public class PlayerMove : MonoBehaviour
     }
     void EndWalk(CallbackContext ctx)
     {
-        //var moveVector = new Vector2(0.0f, 0.0f);
-        //moveVector.y = m_rigidbody.velocity.y;
-        //m_rigidbody.velocity = moveVector;
         bIsWalking = false;
     }
-    // Update is called once per frame
+
+        // Update is called once per frame
     void Update()
     {
 
     }
     void FixedUpdate()
     {
-        if(!bIsWalking)
+        if (!bIsWalking)
         {
             Vector2 moveInput = m_rigidbody.velocity;
             Mathf.SmoothDamp(m_rigidbody.velocity.x, 0.0f, ref moveInput.x, 1.0f);
             m_rigidbody.velocity = moveInput;
         }
+        m_Animator.SetFloat("playerSpeed", m_rigidbody.velocity.x);
+ 
 
+    }
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        m_Animator.SetBool("bIsJumping", false);
     }
 }

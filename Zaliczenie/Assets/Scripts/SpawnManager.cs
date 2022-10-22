@@ -17,7 +17,7 @@ public class SpawnManager : MonoBehaviour
 
     private Keyboard m_keyboardToSet = null;
     private Mouse m_mouseToSet = null;
-    private List<Gamepad> m_allGamepads;
+
     public void RegisterSpawnPoint(SpawnPoint spawnPoint)
     {
         m_spawnPoints.Add(spawnPoint); 
@@ -26,11 +26,17 @@ public class SpawnManager : MonoBehaviour
     // Start is called before the first frame update 
     void Start()
     {
+        //TODO handle new controller connected
+        BindAllDevicesToSpawnMethods();
+    }
+
+    private void BindAllDevicesToSpawnMethods()
+    {
         m_keyboardToSet = Keyboard.current;
         m_mouseToSet = Mouse.current;
-        m_allGamepads = Gamepad.all.ToList<Gamepad>();
+        List<Gamepad> allGamepads = Gamepad.all.ToList<Gamepad>();
 
-        foreach(var gamepad in m_allGamepads)
+        foreach (var gamepad in allGamepads)
         {
             var joinGame = new InputAction("join");
             joinGame.AddBinding(gamepad.aButton);
@@ -42,6 +48,7 @@ public class SpawnManager : MonoBehaviour
         joinGameKeyboard.performed += HandleKeyboardInput;
         joinGameKeyboard.Enable();
     }
+
     void Awake()
     {
         if (instance != null && instance != this)
