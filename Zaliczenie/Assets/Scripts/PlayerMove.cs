@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq.Expressions;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEditor.U2D.Path.GUIFramework;
@@ -12,15 +12,16 @@ using static UnityEngine.InputSystem.InputAction;
 
 public class PlayerMove : MonoBehaviour
 {
+    private bool m_bIsJumping = false;
+    public float m_playerSpeed = 1.0f;
+
     public Gamepad m_playerGamepad { get; set; }
     public Mouse m_playerMouse { get; set; }
     public Keyboard m_playerKeyboard { get; set; }
     private Animator m_Animator;
-    private bool bIsWalking = false;
-    private bool bIsJumping = false;
-    public float m_playerSpeed = 1.0f;
     private InputAction m_accelerateAction = new InputAction();
-    private Rigidbody2D m_rigidbody;    
+    private Rigidbody2D m_rigidbody;
+    HashSet<Action> m_methodsOnUpdate = new HashSet<Action>();
     // Start is called before the first frame update
     void Start()
     {
@@ -41,13 +42,11 @@ public class PlayerMove : MonoBehaviour
 
     private void MapGamepad()
     {
-        //var action = new InputAction(binding: m_playerGamepad.aButton.ToString());
         var gamepadName = m_playerGamepad.name + "/";
         var jump = new InputAction(binding: gamepadName + m_playerGamepad.aButton.name);
         jump.performed += _ => Jump();
         jump.Enable();
-        //var accelerateAction = new InputAction();
-        m_accelerateAction.AddBinding(m_playerGamepad.rightStick);
+        m_accelerateAction.AddBinding(m_playerGamepad.leftStick);
        
     }
     private void MapMouseAndKeyboard()
@@ -73,18 +72,22 @@ public class PlayerMove : MonoBehaviour
         }
         m_rigidbody.AddForce(new Vector2(0.0f, 7.0f), ForceMode2D.Impulse);
         m_Animator.SetBool("bIsJumping", true);
+        m_bIsJumping = true;
     }
     void Walk(CallbackContext ctx)
     {
+        m_methodsOnUpdate.Remove(StopWalking);
+        m_methodsOnUpdate.Add(OnWalking);
         var moveVector = new Vector2(ctx.ReadValue<Vector2>().x, 0.0f);
         moveVector.x *= m_playerSpeed;
         moveVector.y = m_rigidbody.velocity.y;
         m_rigidbody.velocity = moveVector;
-        bIsWalking = true;
+        
     }
     void EndWalk(CallbackContext ctx)
     {
-        bIsWalking = false;
+        m_methodsOnUpdate.Add(StopWalking);
+        m_methodsOnUpdate.Remove(OnWalking);
     }
 
         // Update is called once per frame
@@ -94,18 +97,34 @@ public class PlayerMove : MonoBehaviour
     }
     void FixedUpdate()
     {
-        if (!bIsWalking)
-        {
-            Vector2 moveInput = m_rigidbody.velocity;
-            Mathf.SmoothDamp(m_rigidbody.velocity.x, 0.0f, ref moveInput.x, 1.0f);
-            m_rigidbody.velocity = moveInput;
-        }
         m_Animator.SetFloat("playerSpeed", m_rigidbody.velocity.x);
- 
-
+        foreach (Action a in m_methodsOnUpdate)
+        {
+            a.Invoke();
+        }
     }
+
+    private void StopWalking()
+    {
+        Vector2 moveInput = m_rigidbody.velocity;
+        Mathf.SmoothDamp(m_rigidbody.velocity.x, 0.0f, ref moveInput.x, 1.0f);
+        m_rigidbody.velocity = moveInput;
+        m_Animator.speed = 1;
+    }    
+    private void OnWalking()
+    {
+        if(m_bIsJumping)
+        {
+            m_Animator.speed = 1;
+            return;
+        }
+        m_Animator.speed = Math.Abs(m_rigidbody.velocity.x);
+    }
+
     void OnCollisionEnter2D(Collision2D col)
     {
         m_Animator.SetBool("bIsJumping", false);
+        m_bIsJumping = false;
+
     }
 }
