@@ -13,7 +13,7 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
         m_projectileRB = projectileRB;
         m_projectileRB.mass = mass;
         m_projectileRB.gravityScale = gravityScale;
-        //Physics.IgnoreCollision();
+        Physics2D.IgnoreCollision(this.GetComponent<Collider2D>(), m_owner.GetComponent<Collider2D>());
     }
     public void FireAtDirection(Vector2 direction, float velocity)
     {
@@ -28,25 +28,10 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
     }
     void OnCollisionEnter2D(Collision2D col)
     {
-        //var ownerCol = m_owner.GetComponent<Collision2D>();
-        //if(ownerCol != null)
-        //{
-        //    if(col == ownerCol)
-        //    {
-        //        return;
-        //    }
-        //}
         RemoveActionFromFixedUpdate(UpdateRotation);
         m_projectileRB.isKinematic = true;
         m_projectileRB.freezeRotation = true;
         m_projectileRB.velocity = new Vector2(0f,0f);
-
-
-    }
-
-    void Start()
-    {
-        
     }
 
 }

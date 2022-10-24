@@ -42,7 +42,7 @@ public class PlayerMove : UsingOnUpdateBase
         RenderArrow(false);
 
         //update animator
-        AddActionOnFixedUpdate(() => m_Animator.SetFloat("playerSpeed", m_rigidbody.velocity.x));
+        AddActionOnFixedUpdate(() => m_Animator.SetFloat("playerSpeed", Math.Abs(m_rigidbody.velocity.x)));
 
         if (m_playerGamepad != null)
         {
@@ -110,6 +110,20 @@ public class PlayerMove : UsingOnUpdateBase
         moveVector.y = m_rigidbody.velocity.y;
         m_rigidbody.velocity = moveVector;
 
+        var renderer = GetComponent<SpriteRenderer>();
+        if (renderer == null)
+        {
+            Debug.LogError("Player Sprite is missing a renderer");
+        }
+        if(moveVector.x < 0)
+        {
+            renderer.flipX = true;
+        }
+        else
+        {
+            renderer.flipX = false;
+        }
+
 
     }
     void EndWalk(CallbackContext ctx)
@@ -174,6 +188,7 @@ public class PlayerMove : UsingOnUpdateBase
             return;
         }
         m_Animator.speed = Math.Abs(m_rigidbody.velocity.x);
+
     }
 
     void OnCollisionEnter2D(Collision2D col)
