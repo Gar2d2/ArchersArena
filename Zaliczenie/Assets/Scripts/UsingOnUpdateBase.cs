@@ -25,6 +25,11 @@ public class UsingOnUpdateBase : MonoBehaviour
         m_methodsOnUpdate.Remove(action);
     }
 
+    protected IEnumerator MakeActionWithDelay(Action action, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        action.Invoke();
+    }
     // Update is called once per frame
     protected virtual void Update()
     {

@@ -13,6 +13,7 @@ using static UnityEngine.InputSystem.InputAction;
 public class PlayerMove : UsingOnUpdateBase
 {
     private bool m_bIsJumping = false;
+    private bool m_canShoot = true;
 
     [SerializeField]
     private float m_smoothTime = 1.0f;
@@ -20,23 +21,40 @@ public class PlayerMove : UsingOnUpdateBase
     private float m_playerSpeed = 1.0f;
     [SerializeField]
     private GameObject m_projectilePrefab;
+    [SerializeField]
+    private float m_delayBetweenShots = 0.1f;
 
-    public Gamepad m_playerGamepad { get; set; }
+    private GameObject m_indicatorArrow;
     public Mouse m_playerMouse { get; set; }
     public Keyboard m_playerKeyboard { get; set; }
-    private Animator m_Animator;
+    public Gamepad m_playerGamepad { get; set; }
 
     private InputAction m_walkingAction = new InputAction("Walking");
     private InputAction m_aimingAction = new InputAction("StartAiming");
-    private GameObject m_indicatorArrow;
 
+    private Animator m_Animator;
     private Rigidbody2D m_rigidbody;
+    private SpriteRenderer m_renderer;
 
     // Start is called before the first frame update
     void Start()
     {
+
+        m_renderer = GetComponent<SpriteRenderer>();
+        if (m_renderer == null)
+        {
+            Debug.LogError("Player Sprite is missing a renderer");
+        }
         m_rigidbody = GetComponent<Rigidbody2D>();
+        if (m_rigidbody == null)
+        {
+            Debug.LogError("Player Sprite is missing a rigidbody");
+        }
         m_Animator = GetComponent<Animator>();
+        if (m_Animator == null)
+        {
+            Debug.LogError("Player Sprite is missing a animator");
+        }
 
         m_indicatorArrow = this.transform.Find("IndicatorArrow").gameObject;
         RenderArrow(false);
@@ -109,23 +127,14 @@ public class PlayerMove : UsingOnUpdateBase
         moveVector.x *= m_playerSpeed;
         moveVector.y = m_rigidbody.velocity.y;
         m_rigidbody.velocity = moveVector;
-
-        var renderer = GetComponent<SpriteRenderer>();
-        if (renderer == null)
-        {
-            Debug.LogError("Player Sprite is missing a renderer");
-        }
-        if(moveVector.x < 0)
-        {
-            renderer.flipX = true;
-        }
-        else
-        {
-            renderer.flipX = false;
-        }
-
-
+        FlipSpriteTowardsMovement();
     }
+
+    private void FlipSpriteTowardsMovement()
+    {
+        m_renderer.flipX = m_rigidbody.velocity.x < 0 ? true : false;
+    }
+
     void EndWalk(CallbackContext ctx)
     {
         AddActionOnUpdate(StopWalking);
@@ -164,14 +173,24 @@ public class PlayerMove : UsingOnUpdateBase
 
         var direction = m_indicatorArrow.transform.up;
         direction.Normalize();
-        var position = m_indicatorArrow.transform.position + direction * 2;
+        var position = m_indicatorArrow.transform.position;
         var arrow = Instantiate(m_projectilePrefab, position, Quaternion.identity);
 
         var projectileComp = arrow.GetComponent<ProjectileBase>();
-        if (projectileComp)
+        if (projectileComp && m_canShoot)
         {
-            projectileComp.FireAtDirection(m_indicatorArrow.transform.up, 10, this.gameObject);
+            Fire(projectileComp);
         }
+
+    }
+
+    private void Fire(ProjectileBase projectileComp)
+    {
+        m_canShoot = false;
+        projectileComp.FireAtDirection(m_indicatorArrow.transform.up, 10, this.gameObject);
+        m_Animator.SetTrigger("tShoot");
+        m_renderer.flipX = m_indicatorArrow.transform.up.x > 0 ? true : false;
+        StartCoroutine(MakeActionWithDelay(() => m_canShoot = true, m_delayBetweenShots));
     }
     private void StopWalking()
     {
