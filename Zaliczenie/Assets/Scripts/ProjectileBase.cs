@@ -5,11 +5,13 @@ using UnityEngine;
 
 public class ProjectileBase : UsingOnUpdateBase
 {
+    public bool bCanBePickedUp = false;
     // Start is called before the first frame update
     private ProjectileMovementComponent m_projectileMovementComponent;
     private Rigidbody2D m_rigidbody;
+    
     [SerializeField]
-    float m_maxVelocity = 10f;
+    float m_maxVelocity = 20f;
     GameObject m_owner;
     public void FireAtDirection(Vector2 direction, float velocity, GameObject owner)
     {
@@ -19,6 +21,11 @@ public class ProjectileBase : UsingOnUpdateBase
         m_projectileMovementComponent = GetComponent<ProjectileMovementComponent>();
 
         m_projectileMovementComponent.SetupComponent(m_rigidbody, owner, 1f,0.1f);
-        m_projectileMovementComponent.FireAtDirection(direction, Mathf.Clamp(velocity, 0f, m_maxVelocity));
+        m_projectileMovementComponent.FireAtDirection(direction, Mathf.Clamp(velocity, 0f, m_maxVelocity), AtTargetHit);
+    }
+    void AtTargetHit()
+    {
+        bCanBePickedUp = true;
+        GetComponent<Collider2D>().isTrigger = true;
     }
 }

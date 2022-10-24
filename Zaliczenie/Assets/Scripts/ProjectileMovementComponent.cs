@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,7 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
     // Start is called before the first frame update
     private Rigidbody2D m_projectileRB;
     private GameObject m_owner;
+    private Action m_onTargetHitDelegate;
     public void SetupComponent(Rigidbody2D projectileRB, GameObject owner = null, float mass = 1, float gravityScale = 1)
     {
         m_owner = owner;
@@ -15,8 +17,9 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
         m_projectileRB.gravityScale = gravityScale;
         Physics2D.IgnoreCollision(this.GetComponent<Collider2D>(), m_owner.GetComponent<Collider2D>());
     }
-    public void FireAtDirection(Vector2 direction, float velocity)
+    public void FireAtDirection(Vector2 direction, float velocity, Action onTargetHitDelegate = null)
     {
+        m_onTargetHitDelegate = onTargetHitDelegate;
         m_projectileRB.velocity = direction * velocity;
         AddActionOnFixedUpdate(UpdateRotation);
     }
@@ -33,6 +36,7 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
         m_projectileRB.freezeRotation = true;
         m_projectileRB.velocity = new Vector2(0f,0f);
         Physics2D.IgnoreCollision(this.GetComponent<Collider2D>(), m_owner.GetComponent<Collider2D>(), false);
+        m_onTargetHitDelegate.Invoke();
     }
 
 }

@@ -13,8 +13,10 @@ using static UnityEngine.InputSystem.InputAction;
 public class PlayerMove : UsingOnUpdateBase
 {
     private bool m_bIsJumping = false;
-    private bool m_canShoot = true;
-
+    private bool m_bCanShoot = true;
+    const int MAX_ARROWS = 8;
+    [SerializeField]
+    private int m_arrowsCount = 4;
     [SerializeField]
     private float m_smoothTime = 1.0f;
     [SerializeField]
@@ -25,6 +27,7 @@ public class PlayerMove : UsingOnUpdateBase
     private float m_delayBetweenShots = 0.1f;
 
     private GameObject m_indicatorArrow;
+    private List<GameObject> m_quiver = new List<GameObject>();
     public Mouse m_playerMouse { get; set; }
     public Keyboard m_playerKeyboard { get; set; }
     public Gamepad m_playerGamepad { get; set; }
@@ -57,6 +60,8 @@ public class PlayerMove : UsingOnUpdateBase
         }
 
         m_indicatorArrow = this.transform.Find("IndicatorArrow").gameObject;
+        SetupQuiver();
+
         RenderArrow(false);
 
         //update animator
@@ -75,6 +80,23 @@ public class PlayerMove : UsingOnUpdateBase
         m_walkingAction.Enable();
 
         m_aimingAction.Enable();
+    }
+
+    private void SetupQuiver()
+    {
+        var quiver = this.transform.Find("quiver");
+        for (int i = 0; i < quiver.childCount; i++)
+        {
+            m_quiver.Add(quiver.GetChild(i).gameObject);
+        }
+        foreach (var arrow in m_quiver)
+        {
+            arrow.SetActive(false);
+        }
+        for (int i = 0; i < m_arrowsCount; i++)
+        {
+            m_quiver[i].SetActive(true);
+        }
     }
 
     private void MapGamepad()
@@ -170,14 +192,19 @@ public class PlayerMove : UsingOnUpdateBase
         {
             RemoveActionFromUpdate(IndicatorFollowRightStick);
         }
-
+        
+        if(!m_bCanShoot || m_arrowsCount <= 0)
+        {
+            return;
+        }
         var direction = m_indicatorArrow.transform.up;
         direction.Normalize();
         var position = m_indicatorArrow.transform.position;
         var arrow = Instantiate(m_projectilePrefab, position, Quaternion.identity);
 
         var projectileComp = arrow.GetComponent<ProjectileBase>();
-        if (projectileComp && m_canShoot)
+
+        if (projectileComp)
         {
             Fire(projectileComp);
         }
@@ -186,11 +213,12 @@ public class PlayerMove : UsingOnUpdateBase
 
     private void Fire(ProjectileBase projectileComp)
     {
-        m_canShoot = false;
+        LowerArrowCount();
+        m_bCanShoot = false;
         projectileComp.FireAtDirection(m_indicatorArrow.transform.up, 10, this.gameObject);
         m_Animator.SetTrigger("tShoot");
         m_renderer.flipX = m_indicatorArrow.transform.up.x > 0 ? true : false;
-        StartCoroutine(MakeActionWithDelay(() => m_canShoot = true, m_delayBetweenShots));
+        StartCoroutine(MakeActionWithDelay(() => m_bCanShoot = true, m_delayBetweenShots));
     }
     private void StopWalking()
     {
@@ -209,13 +237,33 @@ public class PlayerMove : UsingOnUpdateBase
         m_Animator.speed = Math.Abs(m_rigidbody.velocity.x);
 
     }
-
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.tag == "Arrow")
+        {
+            if (col.gameObject.GetComponent<ProjectileBase>().bCanBePickedUp)
+            {
+                Destroy(col.gameObject);
+                IncreaseArrowCount();
+            }
+        }
+    }
     void OnCollisionEnter2D(Collision2D col)
     {
         m_Animator.SetBool("bIsJumping", false);
         m_bIsJumping = false;
+     
     }
-
+    void IncreaseArrowCount()
+    {
+        m_arrowsCount = Math.Clamp(m_arrowsCount + 1, 0, MAX_ARROWS);
+        m_quiver[m_arrowsCount - 1].SetActive(true);
+    }
+    void LowerArrowCount()
+    {
+        m_arrowsCount = Math.Clamp(m_arrowsCount - 1, 0, MAX_ARROWS);
+        m_quiver[m_arrowsCount].SetActive(false);
+    }
     private void IndicatorFollowMouse()
     {
         var mouseScreenPosition = m_playerMouse.position.ReadValue();
