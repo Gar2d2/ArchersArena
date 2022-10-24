@@ -136,7 +136,7 @@ public class PlayerMove : UsingOnUpdateBase
         {
             return;
         }
-        m_rigidbody.AddForce(new Vector2(0.0f, 7.0f), ForceMode2D.Impulse);
+        m_rigidbody.AddForce(new Vector2(0.0f, 11.0f), ForceMode2D.Impulse);
         m_Animator.SetBool("bIsJumping", true);
         m_bIsJumping = true;
     }
@@ -252,7 +252,19 @@ public class PlayerMove : UsingOnUpdateBase
     {
         m_Animator.SetBool("bIsJumping", false);
         m_bIsJumping = false;
-     
+        if (col.collider.tag == "Arrow")
+        {
+            //TODO move this to function - unbind all from all actions
+            m_Animator.SetTrigger("tDeath");
+            m_bCanShoot = false;
+            m_renderer.flipX = m_renderer.flipX ? false : true;
+            AddActionOnUpdate(() => m_rigidbody.velocity = new Vector2(0f, 0f)); //disable input
+        }
+
+    }
+    void OnDeath()
+    {
+        Destroy(this.gameObject);
     }
     void IncreaseArrowCount()
     {
