@@ -34,6 +34,9 @@ public class PlayerMove : UsingOnUpdateBase
     // Start is called before the first frame update
     void Start()
     {
+        m_rigidbody = GetComponent<Rigidbody2D>();
+        m_Animator = GetComponent<Animator>();
+
         m_indicatorArrow = this.transform.Find("IndicatorArrow").gameObject;
         RenderArrow(false);
 
@@ -53,8 +56,6 @@ public class PlayerMove : UsingOnUpdateBase
         m_walkingAction.Enable();
 
         m_aimingAction.Enable();
-        m_rigidbody = GetComponent<Rigidbody2D>();
-        m_Animator = GetComponent<Animator>();
     }
 
     private void MapGamepad()
@@ -95,7 +96,6 @@ public class PlayerMove : UsingOnUpdateBase
             return;
         }
         m_rigidbody.AddForce(new Vector2(0.0f, 7.0f), ForceMode2D.Impulse);
-        Debug.Log(m_rigidbody.velocity.ToString());
         m_Animator.SetBool("bIsJumping", true);
         m_bIsJumping = true;
     }
@@ -120,7 +120,6 @@ public class PlayerMove : UsingOnUpdateBase
 
     private void StartAiming(CallbackContext ctx)
     {
-        //RenderArrow(true);
         if(ctx.control.device is Mouse)
         {
             AddActionOnUpdate(IndicatorFollowMouse);
