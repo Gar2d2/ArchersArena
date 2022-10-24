@@ -10,12 +10,15 @@ using UnityEngine.InputSystem;
 
 using static UnityEngine.InputSystem.InputAction;
 
-public class PlayerMove : MonoBehaviour
+public class PlayerMove : UsingOnUpdateBase
 {
     private bool m_bIsJumping = false;
-    public float m_playerSpeed = 1.0f;
 
-    private GameObject m_indicatorArrow;
+    [SerializeField]
+    private float m_smoothTime = 1.0f;
+    [SerializeField]
+    private float m_playerSpeed = 1.0f;
+
 
     public Gamepad m_playerGamepad { get; set; }
     public Mouse m_playerMouse { get; set; }
@@ -24,15 +27,18 @@ public class PlayerMove : MonoBehaviour
 
     private InputAction m_walkingAction = new InputAction("Walking");
     private InputAction m_aimingAction = new InputAction("StartAiming");
+    private GameObject m_indicatorArrow;
 
     private Rigidbody2D m_rigidbody;
-    HashSet<Action> m_methodsOnUpdate = new HashSet<Action>();
+
     // Start is called before the first frame update
     void Start()
     {
         m_indicatorArrow = this.transform.Find("IndicatorArrow").gameObject;
-
         RenderArrow(false);
+
+        //update animator
+        AddActionOnFixedUpdate(() => m_Animator.SetFloat("playerSpeed", m_rigidbody.velocity.x));
 
         if (m_playerGamepad != null)
         {
@@ -77,9 +83,6 @@ public class PlayerMove : MonoBehaviour
                 .With("Left", "<Keyboard>/a")
                 .With("Right", "<Keyboard>/d");
 
-
-        jump.performed += _ => Jump();
-        jump.Enable();
         m_aimingAction.AddBinding(m_playerMouse.leftButton);
         m_aimingAction.performed += StartAiming;
         m_aimingAction.canceled += StopAiming;
@@ -92,13 +95,15 @@ public class PlayerMove : MonoBehaviour
             return;
         }
         m_rigidbody.AddForce(new Vector2(0.0f, 7.0f), ForceMode2D.Impulse);
+        Debug.Log(m_rigidbody.velocity.ToString());
         m_Animator.SetBool("bIsJumping", true);
         m_bIsJumping = true;
     }
     void Walk(CallbackContext ctx)
     {
-        m_methodsOnUpdate.Remove(StopWalking);
-        m_methodsOnUpdate.Add(OnWalking);
+        RemoveActionFromUpdate(StopWalking);
+        AddActionOnUpdate(OnWalking);
+
         var moveVector = new Vector2(ctx.ReadValue<Vector2>().x, 0.0f);
         moveVector.x *= m_playerSpeed;
         moveVector.y = m_rigidbody.velocity.y;
@@ -108,30 +113,27 @@ public class PlayerMove : MonoBehaviour
     }
     void EndWalk(CallbackContext ctx)
     {
-        m_methodsOnUpdate.Add(StopWalking);
-        m_methodsOnUpdate.Remove(OnWalking);
+        AddActionOnUpdate(StopWalking);
+        RemoveActionFromUpdate(OnWalking);
     }
 
 
     private void StartAiming(CallbackContext ctx)
     {
-        RenderArrow(true);
+        //RenderArrow(true);
         if(ctx.control.device is Mouse)
         {
-            m_methodsOnUpdate.Add(IndicatorFollowMouse);
+            AddActionOnUpdate(IndicatorFollowMouse);
         }
         else if(ctx.control.device is Gamepad)
         {
-            m_methodsOnUpdate.Add(IndicatorFollowRightStick);
+            AddActionOnUpdate(IndicatorFollowRightStick);
         }
     }
 
     private void RenderArrow(bool bRender)
     {
-        foreach (var rend in m_indicatorArrow.GetComponentsInChildren(typeof(Renderer)))
-        {
-            ((Renderer)rend).enabled = bRender;
-        }
+        m_indicatorArrow.SetActive(bRender);
     }
 
     private void StopAiming(CallbackContext ctx)
@@ -139,17 +141,17 @@ public class PlayerMove : MonoBehaviour
         RenderArrow(false);
         if (ctx.control.device is Mouse)
         {
-            m_methodsOnUpdate.Remove(IndicatorFollowMouse);
+            RemoveActionFromUpdate(IndicatorFollowMouse);
         }
         else if (ctx.control.device is Gamepad)
         {
-            m_methodsOnUpdate.Remove(IndicatorFollowRightStick);
+            RemoveActionFromUpdate(IndicatorFollowRightStick);
         }
     }
     private void StopWalking()
     {
         Vector2 moveInput = m_rigidbody.velocity;
-        Mathf.SmoothDamp(m_rigidbody.velocity.x, 0.0f, ref moveInput.x, 1.0f);
+        Mathf.SmoothDamp(m_rigidbody.velocity.x, 0.0f, ref moveInput.x, m_smoothTime);
         m_rigidbody.velocity = moveInput;
         m_Animator.speed = 1;
     }    
@@ -170,22 +172,6 @@ public class PlayerMove : MonoBehaviour
 
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    void FixedUpdate()
-    {
-        m_Animator.SetFloat("playerSpeed", m_rigidbody.velocity.x);
-        foreach (Action a in m_methodsOnUpdate)
-        {
-            a.Invoke();
-        }
-
-    }
-
     private void IndicatorFollowMouse()
     {
         var mouseScreenPosition = m_playerMouse.position.ReadValue();
@@ -195,16 +181,23 @@ public class PlayerMove : MonoBehaviour
             mouseScreenPosition.x - m_indicatorArrow.transform.position.x,
             mouseScreenPosition.y - m_indicatorArrow.transform.position.y
             );
-
+        if(dir.magnitude < 0.1)
+        {
+            RenderArrow(false);
+            return;
+        }
+        RenderArrow(true);
         m_indicatorArrow.transform.up = dir;
     }
     private void IndicatorFollowRightStick()
     {
         var gamepadVal = m_playerGamepad.rightStick.ReadValue();
-        if(gamepadVal.magnitude < 0.1)
+        if(gamepadVal.magnitude < 0.3)
         {
+            RenderArrow(false);
             return;
         }
+        RenderArrow(true);
         gamepadVal.Normalize();
         m_indicatorArrow.transform.up = gamepadVal;
     }
