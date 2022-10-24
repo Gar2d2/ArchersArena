@@ -124,6 +124,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_smoothTime: 0.5
   m_playerSpeed: 5
+  m_projectilePrefab: {fileID: 8637091347404238757, guid: efbdabe067db26844b536e83c3b708c6, type: 3}
 --- !u!61 &3431135682911917460
 BoxCollider2D:
   m_ObjectHideFlags: 0

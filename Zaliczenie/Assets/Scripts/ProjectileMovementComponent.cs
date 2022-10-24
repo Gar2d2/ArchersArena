@@ -6,11 +6,14 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
 {
     // Start is called before the first frame update
     private Rigidbody2D m_projectileRB;
-    public void SetupComponent(Rigidbody2D projectileRB, float mass = 1, float gravityScale = 1)
+    private GameObject m_owner;
+    public void SetupComponent(Rigidbody2D projectileRB, GameObject owner = null, float mass = 1, float gravityScale = 1)
     {
+        m_owner = owner;
         m_projectileRB = projectileRB;
         m_projectileRB.mass = mass;
         m_projectileRB.gravityScale = gravityScale;
+        //Physics.IgnoreCollision();
     }
     public void FireAtDirection(Vector2 direction, float velocity)
     {
@@ -22,6 +25,23 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
         var direction = m_projectileRB.velocity;
         direction.Normalize();
         m_projectileRB.transform.up = direction;
+    }
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        //var ownerCol = m_owner.GetComponent<Collision2D>();
+        //if(ownerCol != null)
+        //{
+        //    if(col == ownerCol)
+        //    {
+        //        return;
+        //    }
+        //}
+        RemoveActionFromFixedUpdate(UpdateRotation);
+        m_projectileRB.isKinematic = true;
+        m_projectileRB.freezeRotation = true;
+        m_projectileRB.velocity = new Vector2(0f,0f);
+
+
     }
 
     void Start()

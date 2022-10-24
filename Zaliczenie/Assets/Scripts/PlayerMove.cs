@@ -18,7 +18,8 @@ public class PlayerMove : UsingOnUpdateBase
     private float m_smoothTime = 1.0f;
     [SerializeField]
     private float m_playerSpeed = 1.0f;
-
+    [SerializeField]
+    private GameObject m_projectilePrefab;
 
     public Gamepad m_playerGamepad { get; set; }
     public Mouse m_playerMouse { get; set; }
@@ -146,6 +147,17 @@ public class PlayerMove : UsingOnUpdateBase
         {
             RemoveActionFromUpdate(IndicatorFollowRightStick);
         }
+
+        var direction = m_indicatorArrow.transform.up;
+        direction.Normalize();
+        var position = m_indicatorArrow.transform.position + direction * 2;
+        var arrow = Instantiate(m_projectilePrefab, position, Quaternion.identity);
+
+        var projectileComp = arrow.GetComponent<ProjectileBase>();
+        if (projectileComp)
+        {
+            projectileComp.FireAtDirection(m_indicatorArrow.transform.up, 10, this.gameObject);
+        }
     }
     private void StopWalking()
     {
@@ -168,7 +180,6 @@ public class PlayerMove : UsingOnUpdateBase
     {
         m_Animator.SetBool("bIsJumping", false);
         m_bIsJumping = false;
-
     }
 
     private void IndicatorFollowMouse()
