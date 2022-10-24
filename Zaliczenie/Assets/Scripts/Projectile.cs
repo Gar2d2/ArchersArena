@@ -16,7 +16,7 @@ public class Projectile : UsingOnUpdateBase
             return;
         }
         m_projectileMovementComponent = GetComponent<ProjectileMovementComponent>();
-        m_projectileMovementComponent.SetupComponent(m_rigidbody);
+        m_projectileMovementComponent.SetupComponent(m_rigidbody,1f,0.1f);
         m_projectileMovementComponent.FireAtDirection(new Vector2(1f, 0f), 5);
     }
 }

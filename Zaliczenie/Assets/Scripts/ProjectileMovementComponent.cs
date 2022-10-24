@@ -15,15 +15,14 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
     public void FireAtDirection(Vector2 direction, float velocity)
     {
         m_projectileRB.velocity = direction * velocity;
-        //AddActionOnFixedUpdate(UpdateMovement);
+        AddActionOnFixedUpdate(UpdateRotation);
     }
-    //void UpdateMovement()
-    //{
-    //    Vector2 velocity = m_projectileRB.velocity;
-    //    velocity.x = 5;
-    //    m_projectileRB.velocity = velocity;
-
-    //}
+    void UpdateRotation()
+    {
+        var direction = m_projectileRB.velocity;
+        direction.Normalize();
+        m_projectileRB.transform.up = direction;
+    }
 
     void Start()
     {
