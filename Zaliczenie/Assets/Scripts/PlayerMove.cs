@@ -41,6 +41,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
 
     private InputAction m_walkingAction = new InputAction("Walking");
     private InputAction m_aimingAction = new InputAction("StartAiming");
+    private InputAction m_jumpAction = new InputAction("StartJumping");
 
     private Animator m_Animator;
     private Rigidbody2D m_rigidbody;
@@ -131,10 +132,8 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
 
     private void MapGamepad()
     {
-        var gamepadName = m_playerGamepad.name + "/";
-        var jump = new InputAction(binding: gamepadName + m_playerGamepad.aButton.name);
-        jump.performed += _ => Jump();
-        jump.Enable();
+        m_jumpAction.performed += Jump;
+        m_jumpAction.Enable();
         m_walkingAction.AddBinding(m_playerGamepad.leftStick);
         m_aimingAction.AddBinding(m_playerGamepad.rightTrigger);
         m_aimingAction.performed += StartAiming;
@@ -144,10 +143,11 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     private void MapMouseAndKeyboard()
     {
         //var action = new InputAction(binding: m_playerGamepad.aButton.ToString());
-        var keyboardName = m_playerKeyboard.name + "/";
-        var jump = new InputAction(binding: keyboardName + m_playerKeyboard.spaceKey.name);
-        jump.performed += _ => Jump();
-        jump.Enable();
+        //var keyboardName = m_playerKeyboard.name + "/";
+        //m_jumpAction = new InputAction(binding: keyboardName + m_playerKeyboard.spaceKey.name);
+        m_jumpAction.AddBinding(m_playerKeyboard.spaceKey);
+        m_jumpAction.performed +=Jump;
+        m_jumpAction.Enable();
 
         m_walkingAction.AddCompositeBinding("2DVector") // Or "Dpad"
                 .With("Up", "<Keyboard>/w")
@@ -159,7 +159,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         m_aimingAction.performed += StartAiming;
         m_aimingAction.canceled += StopAiming;
     }
-    void Jump()
+    void Jump(CallbackContext ctx)
     {
         var colider = GetComponent<Collider2D>();
         if (colider == null || Physics2D.BoxCastAll(colider.bounds.center, colider.bounds.size, 0f, Vector2.down, 0.1f).Length <= 1)
@@ -304,7 +304,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
 
     public void OnHitted()
     {
-        if(!m_bIsAlive)
+        if (!m_bIsAlive)
         {
             return;
         }
@@ -313,6 +313,14 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         m_bCanShoot = false;
         m_renderer.flipX = m_renderer.flipX ? false : true;
         AddActionOnUpdate(() => m_rigidbody.velocity = new Vector2(0f, 0f));
+        RemoveBindings();
+    }
+
+    private void RemoveBindings()
+    {
+        m_jumpAction.ChangeBinding(0).Erase();
+        m_aimingAction.ChangeBinding(0).Erase();
+        m_walkingAction.ChangeBinding(0).Erase();
     }
 
     void OnDeath()
