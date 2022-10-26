@@ -9,9 +9,22 @@ using static UnityEngine.InputSystem.InputAction;
 
 public class SpawnManager : MonoBehaviour
 {
+    private int MAX_PLAYERS = 4;
+    struct PlayerDevice
+    {
+        public int ID;
+        public Gamepad gamepad;
+        public Mouse mouse;
+        public Keyboard keyboard;
+    }
+    List<PlayerDevice> m_activePlayersDevices = new List<PlayerDevice>();
+
     public static SpawnManager instance { get; private set; }
     [SerializeField]
     private GameObject m_playerPrefab;
+
+    public List<GameObject> m_PlayerImages;
+
 
     private List<SpawnPoint> m_spawnPoints = new List<SpawnPoint>();
 
@@ -23,10 +36,35 @@ public class SpawnManager : MonoBehaviour
         m_spawnPoints.Add(spawnPoint); 
     }
     
+    public void RespawnPlayers()
+    {
+        foreach (var id_device in m_activePlayersDevices)
+        {
+
+            var player = Instantiate(m_playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
+            var moveComp = player.GetComponent<PlayerMove>();
+            if (moveComp)
+            {
+                if(id_device.gamepad != null)
+                {
+                    moveComp.m_playerGamepad = id_device.gamepad;
+                }
+                else if(id_device.keyboard!= null && id_device.mouse != null)
+                {
+                    moveComp.m_playerKeyboard = id_device.keyboard;
+                    moveComp.m_playerMouse= id_device.mouse;
+                }
+            }
+        }
+
+    }
     // Start is called before the first frame update 
     void Start()
     {
-        //TODO handle new controller connected
+        foreach(var image in m_PlayerImages)
+        {
+            image.SetActive(false);
+        }
         BindAllDevicesToSpawnMethods();
     }
 
@@ -67,25 +105,45 @@ public class SpawnManager : MonoBehaviour
 
     private void HandleGamepadInput(CallbackContext ctx)
     {
-
-        var player = Instantiate(m_playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
-        var moveComp = player.GetComponent<PlayerMove>();
-        if (moveComp)
+        if(m_activePlayersDevices.Count() >= MAX_PLAYERS)
         {
-            moveComp.m_playerGamepad = (Gamepad)ctx.control.device;
-            ctx.action.ChangeBinding(0).Erase();
+            return;
         }
+        //var player = Instantiate(m_playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
+        //var moveComp = player.GetComponent<PlayerMove>();
+        //if (moveComp)
+        //{
+        //moveComp.m_playerGamepad = (Gamepad)ctx.control.device;
+        var playerDevice = new PlayerDevice();
+        playerDevice.gamepad = (Gamepad)ctx.control.device;
+        playerDevice.ID = m_activePlayersDevices.Count();
+        m_PlayerImages[playerDevice.ID].SetActive(true);
+        m_activePlayersDevices.Add(playerDevice);
+        ctx.action.ChangeBinding(0).Erase();
+        //}
+
     }
     private void HandleKeyboardInput(CallbackContext ctx)
     {
-        var player = Instantiate(m_playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
-        var moveComp = player.GetComponent<PlayerMove>();
-        if (moveComp && m_keyboardToSet != null && m_mouseToSet != null)
+        if (m_activePlayersDevices.Count() >= MAX_PLAYERS)
         {
-            moveComp.m_playerKeyboard = m_keyboardToSet;
-            moveComp.m_playerMouse = m_mouseToSet;
-            ctx.action.ChangeBinding(0).Erase();
+            return;
         }
+        //var player = Instantiate(m_playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
+        //var moveComp = player.GetComponent<PlayerMove>();
+        //if (moveComp && m_keyboardToSet != null && m_mouseToSet != null)
+        //{
+        //    moveComp.m_playerKeyboard = m_keyboardToSet;
+        //    moveComp.m_playerMouse = m_mouseToSet;
+        //    ctx.action.ChangeBinding(0).Erase();
+        //}
+        var playerDevice = new PlayerDevice();
+        playerDevice.keyboard = m_keyboardToSet;
+        playerDevice.mouse = m_mouseToSet;
+        playerDevice.ID = m_activePlayersDevices.Count();
+        m_PlayerImages[playerDevice.ID].SetActive(true);
+        m_activePlayersDevices.Add(playerDevice);
+        ctx.action.ChangeBinding(0).Erase();
     }
     private Vector2 GetRandomSpawnPosition()
     {

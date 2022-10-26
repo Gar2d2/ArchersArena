@@ -25,15 +25,26 @@ public class ProjectileBase : UsingOnUpdateBase
     }
     void AtTargetHit(Collision2D col)
     {
-        if(!bCanBePickedUp)
+        if (col.gameObject.tag == "Arrow")
+        {
+            bCanBePickedUp = true;
+            m_rigidbody.velocity = new Vector2(0, 0);
+            return;
+        }
+        if (!bCanBePickedUp)
         {
             var killable = col.gameObject.GetComponent<IKillable>();
             if(killable != null)
             {
                 killable.OnHitted();
+                return;
+
             }
         }
+        m_rigidbody.freezeRotation = true;
+        m_rigidbody.isKinematic = true;
         bCanBePickedUp = true;
         GetComponent<Collider2D>().isTrigger = true;
+
     }
 }
