@@ -47,7 +47,11 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     private Rigidbody2D m_rigidbody;
     private SpriteRenderer m_renderer;
 
-    // Start is called before the first frame update
+    public void OnEject()
+    {
+        m_bIsEjected = true;
+        //m_walkingAction.Disable();
+    }
     void Start()
     {
 
@@ -132,6 +136,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
 
     private void MapGamepad()
     {
+        m_jumpAction.AddBinding(m_playerGamepad.aButton);
         m_jumpAction.performed += Jump;
         m_jumpAction.Enable();
         m_walkingAction.AddBinding(m_playerGamepad.leftStick);
@@ -309,11 +314,12 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         {
             return;
         }
-        m_Animator.SetBool("bIsJumping", false);
-        m_bIsJumping = false;
-        if(col.gameObject.tag != "JumpPad")
+        if(col.gameObject.tag == "Ground")
         {
+            m_bIsJumping = false;
+            m_Animator.SetBool("bIsJumping", false);
             m_bIsEjected = false;
+            m_walkingAction.Enable();
         }
     }
 

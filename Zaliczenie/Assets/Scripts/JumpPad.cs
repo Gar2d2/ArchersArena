@@ -41,7 +41,7 @@ public class JumpPad : MonoBehaviour
             var player = col.gameObject.GetComponent<PlayerMove>();
             if(player!=null)
             {
-                player.m_bIsEjected = true;
+                player.OnEject();
             }
         }
     }
