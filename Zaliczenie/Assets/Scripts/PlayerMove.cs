@@ -17,6 +17,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     const int MAX_ARROWS = 8;
     private bool m_bCanShoot = true;
     private bool m_bIsAlive = true;
+    public bool m_bIsEjected= false;
     [SerializeField]
     private bool m_bChForTests = false;
     [SerializeField]
@@ -171,6 +172,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     }
     void Walk(CallbackContext ctx)
     {
+
         RemoveActionFromUpdate(StopWalking);
         AddActionOnUpdate(OnWalking);
 
@@ -188,6 +190,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
 
     void EndWalk(CallbackContext ctx)
     {
+
         AddActionOnUpdate(StopWalking);
         RemoveActionFromUpdate(OnWalking);
     }
@@ -255,6 +258,10 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     }
     private void StopWalking()
     {
+        if(m_bIsEjected)
+        {
+            return;
+        }
         Vector2 moveInput = m_rigidbody.velocity;
         Mathf.SmoothDamp(m_rigidbody.velocity.x, 0.0f, ref moveInput.x, m_smoothTime);
         m_rigidbody.velocity = moveInput;
@@ -289,6 +296,10 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         }
         m_Animator.SetBool("bIsJumping", false);
         m_bIsJumping = false;
+        if(col.gameObject.tag != "JumpPad")
+        {
+            m_bIsEjected = false;
+        }
     }
 
     public void OnHitted()
