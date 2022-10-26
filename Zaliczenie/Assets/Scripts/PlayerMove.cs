@@ -10,11 +10,14 @@ using UnityEngine.InputSystem;
 
 using static UnityEngine.InputSystem.InputAction;
 
-public class PlayerMove : UsingOnUpdateBase
+public class PlayerMove : UsingOnUpdateBase, IKillable
 {
     private bool m_bIsJumping = false;
-    private bool m_bCanShoot = true;
     const int MAX_ARROWS = 8;
+    private bool m_bCanShoot = true;
+    private bool m_bIsAlive = true;
+    [SerializeField]
+    private bool m_bChForTests = false;
     [SerializeField]
     private int m_arrowsCount = 4;
     [SerializeField]
@@ -24,7 +27,9 @@ public class PlayerMove : UsingOnUpdateBase
     [SerializeField]
     private GameObject m_projectilePrefab;
     [SerializeField]
-    private float m_delayBetweenShots = 0.1f;
+    private float m_delayBetweenShots = 0.1f;   
+    [SerializeField]
+    private float m_jumpForce = 0.1f;
 
     private GameObject m_indicatorArrow;
     private List<GameObject> m_quiver = new List<GameObject>();
@@ -64,6 +69,29 @@ public class PlayerMove : UsingOnUpdateBase
 
         RenderArrow(false);
 
+        //CH for tests
+        if (m_bChForTests)
+        {
+            AddActionOnUpdate(() => {
+                if(!m_bCanShoot)
+                {
+                    return;
+                }
+            var position = m_indicatorArrow.transform.position;
+            var arrow = Instantiate(m_projectilePrefab, position, Quaternion.identity);
+
+            var projectileComp = arrow.GetComponent<ProjectileBase>();
+
+            if (projectileComp)
+            {
+                    m_bCanShoot = false;
+                    projectileComp.FireAtDirection(new Vector2(1f, 0), 20, this.gameObject) ;
+                    m_Animator.SetTrigger("tShoot");
+                    StartCoroutine(MakeActionWithDelay(() => m_bCanShoot = true, 2));
+                }
+        });
+            return;
+        }
         //update animator
         AddActionOnFixedUpdate(() => m_Animator.SetFloat("playerSpeed", Math.Abs(m_rigidbody.velocity.x)));
 
@@ -136,7 +164,7 @@ public class PlayerMove : UsingOnUpdateBase
         {
             return;
         }
-        m_rigidbody.AddForce(new Vector2(0.0f, 11.0f), ForceMode2D.Impulse);
+        m_rigidbody.AddForce(new Vector2(0.0f, m_jumpForce), ForceMode2D.Impulse);
         m_Animator.SetBool("bIsJumping", true);
         m_bIsJumping = true;
     }
@@ -215,9 +243,9 @@ public class PlayerMove : UsingOnUpdateBase
     {
         LowerArrowCount();
         m_bCanShoot = false;
-        projectileComp.FireAtDirection(m_indicatorArrow.transform.up, 10, this.gameObject);
-        m_Animator.SetTrigger("tShoot");
         m_renderer.flipX = m_indicatorArrow.transform.up.x > 0 ? true : false;
+        projectileComp.FireAtDirection(m_indicatorArrow.transform.up, 20, this.gameObject);
+        m_Animator.SetTrigger("tShoot");
         StartCoroutine(MakeActionWithDelay(() => m_bCanShoot = true, m_delayBetweenShots));
     }
     private void StopWalking()
@@ -250,18 +278,32 @@ public class PlayerMove : UsingOnUpdateBase
     }
     void OnCollisionEnter2D(Collision2D col)
     {
+        if(!m_bIsAlive)
+        {
+            return;
+        }
         m_Animator.SetBool("bIsJumping", false);
         m_bIsJumping = false;
-        if (col.collider.tag == "Arrow")
-        {
-            //TODO move this to function - unbind all from all actions
-            m_Animator.SetTrigger("tDeath");
-            m_bCanShoot = false;
-            m_renderer.flipX = m_renderer.flipX ? false : true;
-            AddActionOnUpdate(() => m_rigidbody.velocity = new Vector2(0f, 0f)); //disable input
-        }
+        //if (col.collider.tag == "Arrow")
+        //{
+        //    OnPlayerGetHitted();
+        //}
 
     }
+
+    public void OnHitted()
+    {
+        if(!m_bIsAlive)
+        {
+            return;
+        }
+        m_bIsAlive = false;
+        m_Animator.SetTrigger("tDeath");
+        m_bCanShoot = false;
+        m_renderer.flipX = m_renderer.flipX ? false : true;
+        AddActionOnUpdate(() => m_rigidbody.velocity = new Vector2(0f, 0f));
+    }
+
     void OnDeath()
     {
         Destroy(this.gameObject);

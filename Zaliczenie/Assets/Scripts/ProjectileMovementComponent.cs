@@ -8,7 +8,7 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
     // Start is called before the first frame update
     private Rigidbody2D m_projectileRB;
     private GameObject m_owner;
-    private Action m_onTargetHitDelegate;
+    private Action<Collision2D> m_onTargetHitDelegate;
     public void SetupComponent(Rigidbody2D projectileRB, GameObject owner = null, float mass = 1, float gravityScale = 1)
     {
         m_owner = owner;
@@ -17,7 +17,7 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
         m_projectileRB.gravityScale = gravityScale;
         Physics2D.IgnoreCollision(this.GetComponent<Collider2D>(), m_owner.GetComponent<Collider2D>());
     }
-    public void FireAtDirection(Vector2 direction, float velocity, Action onTargetHitDelegate = null)
+    public void FireAtDirection(Vector2 direction, float velocity, Action<Collision2D> onTargetHitDelegate = null)
     {
         m_onTargetHitDelegate = onTargetHitDelegate;
         m_projectileRB.velocity = direction * velocity;
@@ -31,12 +31,17 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
     }
     void OnCollisionEnter2D(Collision2D col)
     {
+        if(col.gameObject.tag ==  "Arrow")
+        {
+            m_projectileRB.velocity = new Vector2(0, 0);
+            return;
+        }
         RemoveActionFromFixedUpdate(UpdateRotation);
-        m_projectileRB.isKinematic = true;
         m_projectileRB.freezeRotation = true;
+        m_projectileRB.isKinematic = true;
         m_projectileRB.velocity = new Vector2(0f,0f);
         Physics2D.IgnoreCollision(this.GetComponent<Collider2D>(), m_owner.GetComponent<Collider2D>(), false);
-        m_onTargetHitDelegate.Invoke();
+        m_onTargetHitDelegate.Invoke(col);
     }
 
 }

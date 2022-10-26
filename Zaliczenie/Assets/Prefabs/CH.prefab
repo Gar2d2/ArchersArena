@@ -105,7 +105,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 2
+  m_GravityScale: 5
   m_Material: {fileID: 6200000, guid: e246538532aabe5458fe594e41b1f747, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 1
@@ -128,6 +128,7 @@ MonoBehaviour:
   m_playerSpeed: 5
   m_projectilePrefab: {fileID: 8637091347404238757, guid: efbdabe067db26844b536e83c3b708c6, type: 3}
   m_delayBetweenShots: 0.1
+  m_jumpForce: 16
 --- !u!61 &3431135682911917460
 BoxCollider2D:
   m_ObjectHideFlags: 0

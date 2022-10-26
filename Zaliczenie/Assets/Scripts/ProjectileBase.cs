@@ -23,8 +23,16 @@ public class ProjectileBase : UsingOnUpdateBase
         m_projectileMovementComponent.SetupComponent(m_rigidbody, owner, 1f,0.1f);
         m_projectileMovementComponent.FireAtDirection(direction, Mathf.Clamp(velocity, 0f, m_maxVelocity), AtTargetHit);
     }
-    void AtTargetHit()
+    void AtTargetHit(Collision2D col)
     {
+        if(!bCanBePickedUp)
+        {
+            var killable = col.gameObject.GetComponent<IKillable>();
+            if(killable != null)
+            {
+                killable.OnHitted();
+            }
+        }
         bCanBePickedUp = true;
         GetComponent<Collider2D>().isTrigger = true;
     }
