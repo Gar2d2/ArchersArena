@@ -13,6 +13,7 @@ using static UnityEngine.InputSystem.InputAction;
 public class PlayerMove : UsingOnUpdateBase, IKillable
 {
     private bool m_bIsJumping = false;
+    //TODO make it depends on quiver - if above, show count, + or smth
     const int MAX_ARROWS = 8;
     private bool m_bCanShoot = true;
     private bool m_bIsAlive = true;
@@ -248,6 +249,10 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         m_Animator.SetTrigger("tShoot");
         StartCoroutine(MakeActionWithDelay(() => m_bCanShoot = true, m_delayBetweenShots));
     }
+    private void EndShootingTrigger()
+    {
+        m_Animator.SetTrigger("tEndShoot");
+    }
     private void StopWalking()
     {
         Vector2 moveInput = m_rigidbody.velocity;
@@ -284,11 +289,6 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         }
         m_Animator.SetBool("bIsJumping", false);
         m_bIsJumping = false;
-        //if (col.collider.tag == "Arrow")
-        //{
-        //    OnPlayerGetHitted();
-        //}
-
     }
 
     public void OnHitted()
