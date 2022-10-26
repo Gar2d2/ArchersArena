@@ -56,7 +56,7 @@ public class SpawnManager : MonoBehaviour
                 }
             }
         }
-
+        GameState.instance.StartGame();
     }
     // Start is called before the first frame update 
     void Start()
@@ -98,8 +98,6 @@ public class SpawnManager : MonoBehaviour
             instance = this;
         }
 
-        QualitySettings.vSyncCount = 0;  // VSync must be disabled
-        Application.targetFrameRate = 60;
     }
   
 

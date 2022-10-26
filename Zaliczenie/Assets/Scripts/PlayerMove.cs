@@ -161,6 +161,10 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     }
     void Jump(CallbackContext ctx)
     {
+        if(GameState.instance.bGameIsPaused)
+        {
+            return;
+        }
         var colider = GetComponent<Collider2D>();
         if (colider == null || Physics2D.BoxCastAll(colider.bounds.center, colider.bounds.size, 0f, Vector2.down, 0.1f).Length <= 1)
         {
@@ -172,7 +176,10 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     }
     void Walk(CallbackContext ctx)
     {
-
+        if (GameState.instance.bGameIsPaused)
+        {
+            return;
+        }
         RemoveActionFromUpdate(StopWalking);
         AddActionOnUpdate(OnWalking);
 
@@ -198,7 +205,11 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
 
     private void StartAiming(CallbackContext ctx)
     {
-        if(ctx.control.device is Mouse)
+        if (GameState.instance.bGameIsPaused)
+        {
+            return;
+        }
+        if (ctx.control.device is Mouse)
         {
             AddActionOnUpdate(IndicatorFollowMouse);
         }
@@ -215,6 +226,10 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
 
     private void StopAiming(CallbackContext ctx)
     {
+        if (GameState.instance.bGameIsPaused)
+        {
+            return;
+        }
         RenderArrow(false);
         if (ctx.control.device is Mouse)
         {

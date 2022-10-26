@@ -27,12 +27,23 @@ public class UsingOnUpdateBase : MonoBehaviour
 
     protected IEnumerator MakeActionWithDelay(Action action, float delay)
     {
-        yield return new WaitForSeconds(delay);
+        yield return new WaitForSecondsRealtime(delay);
         action.Invoke();
+    }
+    protected IEnumerator MakeActionInFixedTimesWithDelay(Action action, int times, float delay)
+    {
+       for(int i = 0; i < times; i++)
+       {
+           yield return MakeActionWithDelay(action, delay);
+       }
     }
     // Update is called once per frame
     protected virtual void Update()
     {
+        if (GameState.instance.bGameIsPaused)
+        {
+            return;
+        }
         foreach (Action a in m_methodsOnUpdate)
         {
             a.Invoke();
@@ -40,6 +51,10 @@ public class UsingOnUpdateBase : MonoBehaviour
     }
     protected virtual void FixedUpdate()
     {
+        if (GameState.instance.bGameIsPaused)
+        {
+            return;
+        }
         foreach (Action a in m_methodsOnFixedUpdate)
         {
             a.Invoke();
