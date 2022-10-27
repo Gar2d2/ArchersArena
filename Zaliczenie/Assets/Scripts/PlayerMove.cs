@@ -33,6 +33,8 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     [SerializeField]
     private float m_jumpForce = 0.1f;
 
+    public GameObject m_playerColorTriangle;
+
     private GameObject m_indicatorArrow;
     private List<GameObject> m_quiver = new List<GameObject>();
     public Mouse m_playerMouse { get; set; }
@@ -54,7 +56,6 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     }
     void Start()
     {
-
         m_renderer = GetComponent<SpriteRenderer>();
         if (m_renderer == null)
         {

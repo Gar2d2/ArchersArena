@@ -10,14 +10,7 @@ using static UnityEngine.InputSystem.InputAction;
 public class SpawnManager : MonoBehaviour
 {
     private int MAX_PLAYERS = 4;
-    struct PlayerDevice
-    {
-        public int ID;
-        public Gamepad gamepad;
-        public Mouse mouse;
-        public Keyboard keyboard;
-    }
-    List<PlayerDevice> m_activePlayersDevices = new List<PlayerDevice>();
+ 
 
     public static SpawnManager instance { get; private set; }
     [SerializeField]
@@ -31,6 +24,9 @@ public class SpawnManager : MonoBehaviour
     private Keyboard m_keyboardToSet = null;
     private Mouse m_mouseToSet = null;
 
+    private List<int> m_usedSpawnPointsIndexes = new List<int>();
+
+    private GameState m_GS;
     public void RegisterSpawnPoint(SpawnPoint spawnPoint)
     {
         m_spawnPoints.Add(spawnPoint); 
@@ -38,30 +34,32 @@ public class SpawnManager : MonoBehaviour
     
     public void RespawnPlayers()
     {
-        foreach (var id_device in m_activePlayersDevices)
+        m_usedSpawnPointsIndexes.Clear();
+        foreach ( var activePlayer in m_GS.GetActivePlayers())
         {
+            var player = Instantiate(m_playerPrefab, GetNextSpawnPointPosition(), Quaternion.identity);
+            m_GS.playerID_PlayerObject[activePlayer.ID] = player;
 
-            var player = Instantiate(m_playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
             var moveComp = player.GetComponent<PlayerMove>();
             if (moveComp)
             {
-                if(id_device.gamepad != null)
+                if(activePlayer.gamepad != null)
                 {
-                    moveComp.m_playerGamepad = id_device.gamepad;
+                    moveComp.m_playerGamepad = activePlayer.gamepad;
                 }
-                else if(id_device.keyboard!= null && id_device.mouse != null)
+                else if(activePlayer.keyboard!= null && activePlayer.mouse != null)
                 {
-                    moveComp.m_playerKeyboard = id_device.keyboard;
-                    moveComp.m_playerMouse= id_device.mouse;
+                    moveComp.m_playerKeyboard = activePlayer.keyboard;
+                    moveComp.m_playerMouse= activePlayer.mouse;
                 }
             }
         }
-        GameState.instance.StartGame();
     }
     // Start is called before the first frame update 
     void Start()
     {
-        foreach(var image in m_PlayerImages)
+        m_GS = GameState.instance;
+        foreach (var image in m_PlayerImages)
         {
             image.SetActive(false);
         }
@@ -103,53 +101,76 @@ public class SpawnManager : MonoBehaviour
 
     private void HandleGamepadInput(CallbackContext ctx)
     {
-        if(m_activePlayersDevices.Count() >= MAX_PLAYERS)
+        var activePlayers = m_GS.GetActivePlayers();
+        if (activePlayers.Count() >= MAX_PLAYERS)
         {
             return;
         }
-        //var player = Instantiate(m_playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
-        //var moveComp = player.GetComponent<PlayerMove>();
-        //if (moveComp)
-        //{
-        //moveComp.m_playerGamepad = (Gamepad)ctx.control.device;
-        var playerDevice = new PlayerDevice();
+        
+        var playerDevice = new GameState.ActivePlayer();
         playerDevice.gamepad = (Gamepad)ctx.control.device;
-        playerDevice.ID = m_activePlayersDevices.Count();
+        playerDevice.ID = activePlayers.Count();
         m_PlayerImages[playerDevice.ID].SetActive(true);
-        m_activePlayersDevices.Add(playerDevice);
+        m_GS.AddActivePlayer(playerDevice);
         ctx.action.ChangeBinding(0).Erase();
-        //}
+
 
     }
     private void HandleKeyboardInput(CallbackContext ctx)
     {
-        if (m_activePlayersDevices.Count() >= MAX_PLAYERS)
+        var activePlayers = m_GS.GetActivePlayers();
+        if (activePlayers.Count() >= MAX_PLAYERS)
         {
             return;
         }
-        //var player = Instantiate(m_playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
-        //var moveComp = player.GetComponent<PlayerMove>();
-        //if (moveComp && m_keyboardToSet != null && m_mouseToSet != null)
-        //{
-        //    moveComp.m_playerKeyboard = m_keyboardToSet;
-        //    moveComp.m_playerMouse = m_mouseToSet;
-        //    ctx.action.ChangeBinding(0).Erase();
-        //}
-        var playerDevice = new PlayerDevice();
+    
+        var playerDevice = new GameState.ActivePlayer();
         playerDevice.keyboard = m_keyboardToSet;
         playerDevice.mouse = m_mouseToSet;
-        playerDevice.ID = m_activePlayersDevices.Count();
+        playerDevice.ID = activePlayers.Count();
         m_PlayerImages[playerDevice.ID].SetActive(true);
-        m_activePlayersDevices.Add(playerDevice);
+        m_GS.AddActivePlayer(playerDevice);
         ctx.action.ChangeBinding(0).Erase();
     }
-    private Vector2 GetRandomSpawnPosition()
+    private Vector2 GetNextSpawnPointPosition()
     {
         Vector2 spawn = new Vector2(0.0f,0.0f);
-        if(m_spawnPoints.Count > 0)
+        if(m_spawnPoints.Count < m_usedSpawnPointsIndexes.Count)
         {
-            spawn = m_spawnPoints[Random.Range(0, m_spawnPoints.Count-1)].transform.position;
+            return spawn;
         }
+
+        int spawnPointIndex = 0;
+        if(m_usedSpawnPointsIndexes.Count == 0)
+        {
+            if(m_spawnPoints.Count > 0)
+            {
+                spawnPointIndex = Random.Range(0, m_spawnPoints.Count - 1);
+            }
+        }
+        else //find farthest spawn point
+        {
+            double distance = double.NegativeInfinity;
+
+            foreach(var point in m_spawnPoints)
+            {
+                double sumDistances = 0;
+                foreach(var usedPoint in m_usedSpawnPointsIndexes)
+                {
+                    sumDistances += Vector2.Distance(point.transform.position, m_spawnPoints[usedPoint].transform.position);
+                }
+                if(sumDistances > distance)
+                {
+                    distance = sumDistances;
+                    spawnPointIndex = m_spawnPoints.IndexOf(point);
+                }
+            }
+            
+
+        }
+
+        spawn = m_spawnPoints[spawnPointIndex].transform.position;
+        m_usedSpawnPointsIndexes.Add(spawnPointIndex);
         return spawn;
     }
 }
