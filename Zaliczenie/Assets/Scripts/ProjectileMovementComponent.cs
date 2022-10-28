@@ -38,8 +38,6 @@ public class ProjectileMovementComponent : UsingOnUpdateBase
         }
         RemoveActionFromFixedUpdate(UpdateRotation);
         m_projectileRB.velocity = new Vector2(0f,0f);
-        //m_projectileRB.freezeRotation = true;
-        //m_projectileRB.isKinematic = true;
         Physics2D.IgnoreCollision(this.GetComponent<Collider2D>(), m_owner.GetComponent<Collider2D>(), false);
         m_onTargetHitDelegate.Invoke(col);
     }

@@ -35,22 +35,24 @@ public class SpawnManager : MonoBehaviour
     public void RespawnPlayers()
     {
         m_usedSpawnPointsIndexes.Clear();
-        foreach ( var activePlayer in m_GS.GetActivePlayers())
+        var activePlayersCopy = m_GS.GetActivePlayers();
+        for(int i =0; i< activePlayersCopy.Count; i++)
         {
             var player = Instantiate(m_playerPrefab, GetNextSpawnPointPosition(), Quaternion.identity);
-            m_GS.playerID_PlayerObject[activePlayer.ID] = player;
+            m_GS.SetPlayerPawn(activePlayersCopy[i].ID, player);
 
             var moveComp = player.GetComponent<PlayerMove>();
             if (moveComp)
             {
-                if(activePlayer.gamepad != null)
+                moveComp.playerID = activePlayersCopy[i].ID;
+                if(activePlayersCopy[i].gamepad != null)
                 {
-                    moveComp.m_playerGamepad = activePlayer.gamepad;
+                    moveComp.m_playerGamepad = activePlayersCopy[i].gamepad;
                 }
-                else if(activePlayer.keyboard!= null && activePlayer.mouse != null)
+                else if(activePlayersCopy[i].keyboard!= null && activePlayersCopy[i].mouse != null)
                 {
-                    moveComp.m_playerKeyboard = activePlayer.keyboard;
-                    moveComp.m_playerMouse= activePlayer.mouse;
+                    moveComp.m_playerKeyboard = activePlayersCopy[i].keyboard;
+                    moveComp.m_playerMouse= activePlayersCopy[i].mouse;
                 }
             }
         }

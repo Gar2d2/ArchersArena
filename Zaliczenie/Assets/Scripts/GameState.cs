@@ -21,17 +21,28 @@ public class GameState : UsingOnUpdateBase
     public TextMeshProUGUI m_infoText;
     public struct ActivePlayer
     {
-        public int ID;
-        public Gamepad gamepad;
-        public Mouse mouse;
-        public Keyboard keyboard;
+        public int ID { get; set; }
+        public Gamepad gamepad { get; set; }
+        public Mouse mouse { get; set; }
+        public Keyboard keyboard { get; set; }
+        public PlayerUiAccessor playerUi {get;set;}
+        public GameObject playerPawn { get; set; }
     }
 
-    Dictionary<int, PlayerUiAccessor> m_player_UIHeart = new Dictionary<int, PlayerUiAccessor>();
-    public Dictionary<int, GameObject> playerID_PlayerObject = new Dictionary<int, GameObject>();
-    private List<ActivePlayer> m_activePlayers = new List<ActivePlayer>();
+    public List<ActivePlayer> m_activePlayers = new List<ActivePlayer>();
 
-
+    public void SetPlayerPawn(int playerID, GameObject playerPawn)
+    {
+        for(int i=0; i< m_activePlayers.Count; i++)
+        {
+            if (m_activePlayers[i].ID == playerID)
+            {
+                ActivePlayer temp = m_activePlayers[i];
+                temp.playerPawn = playerPawn;
+                m_activePlayers[i] = temp;
+            }
+        }
+    }
     public List<ActivePlayer> GetActivePlayers() { return m_activePlayers; }
     public ref List<ActivePlayer> GetActivePlayersReference() { return ref m_activePlayers; }
     public void AddActivePlayer(ActivePlayer player)
@@ -87,10 +98,11 @@ public class GameState : UsingOnUpdateBase
         SpawnManager.instance.RespawnPlayers();
         SetupActivePlayersUI();
 
-        m_player_UIHeart[m_activePlayers[0].ID].LowerHpCount();
+        PauseGameBeforeStart();
+    }
 
-
-
+    private void PauseGameBeforeStart()
+    {
         PauseGame(true);
         int startingValue = m_secondsBeforeStart;
         StartCoroutine(MakeActionInFixedTimesWithDelay(() => Countdown(ref startingValue), startingValue + 1, 1f));
@@ -98,20 +110,23 @@ public class GameState : UsingOnUpdateBase
 
     private void SetupActivePlayersUI()
     {
-        foreach (var activePlayer in m_activePlayers)
+        for(int i =0; i< m_activePlayers.Count; i++)
         {
-            if (activePlayer.ID > playerID_displayUI.Count)
+            if (m_activePlayers[i].ID > playerID_displayUI.Count)
             {
                 return;
             }
-            var playerUi = playerID_displayUI[activePlayer.ID];
+            var playerUi = playerID_displayUI[m_activePlayers[i].ID];
             playerUi.SetActive(true);
-            var playerPawn = playerID_PlayerObject[activePlayer.ID].GetComponent<PlayerMove>();
+            var playerPawn = m_activePlayers[i].playerPawn.GetComponent<PlayerMove>();
             if (playerPawn)
             {
                 playerPawn.m_playerColorTriangle.GetComponent<Renderer>().material.color = playerUi.GetComponent<Image>().color;
             }
-            m_player_UIHeart[activePlayer.ID] = playerUi.gameObject.GetComponent<PlayerUiAccessor>();
+            ActivePlayer temp = m_activePlayers[i];
+            temp.playerUi = playerUi.gameObject.GetComponent<PlayerUiAccessor>();
+            m_activePlayers[i] = temp;
+
         }
     }
 

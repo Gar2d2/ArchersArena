@@ -17,7 +17,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     const int MAX_ARROWS = 8;
     private bool m_bCanShoot = true;
     private bool m_bIsAlive = true;
-    public bool m_bIsEjected= false;
+    public bool m_bIsEjected = false;
     [SerializeField]
     private bool m_bChForTests = false;
     [SerializeField]
@@ -29,9 +29,11 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     [SerializeField]
     private GameObject m_projectilePrefab;
     [SerializeField]
-    private float m_delayBetweenShots = 0.1f;   
+    private float m_delayBetweenShots = 0.1f;
     [SerializeField]
     private float m_jumpForce = 0.1f;
+
+    public int playerID {get;set;}
 
     public GameObject m_playerColorTriangle;
 
