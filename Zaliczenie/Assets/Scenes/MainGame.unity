@@ -403,6 +403,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Ground
       objectReference: {fileID: 0}
+    - target: {fileID: 2690166214221241885, guid: 1c7544e26c0f0b44080bc50f850a1ebf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -14.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 2690166214221241885, guid: 1c7544e26c0f0b44080bc50f850a1ebf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -6.95
+      objectReference: {fileID: 0}
     - target: {fileID: 2690166214617080411, guid: 1c7544e26c0f0b44080bc50f850a1ebf, type: 3}
       propertyPath: m_TagString
       value: Ground

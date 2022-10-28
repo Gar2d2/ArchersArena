@@ -67,14 +67,115 @@ public class GameState : UsingOnUpdateBase
         bGameIsPaused = newState;
        
     }
-    // Start is called before the first frame update
+    public void OnPlayerDeath(int ID)
+    {
+        //should be dictionary, but im too lazy to fix that
+        for (int i = 0; i < m_activePlayers.Count; i++)
+        {
+            ActivePlayer player = m_activePlayers[i];
+            if (player.ID == ID)
+            {
+                RemovePlayerHP(player);
+                Destroy(player.playerPawn);
+                SetPlayerPawn(player.ID, null);
+            }
+        }
+        //check if we can determinate winner
+        if (IsGameEnded())
+        {
+            string msg;
+            if (m_activePlayers.Count == 0)
+            {
+                msg = " Everybody loosed";
+            }
+            else
+            {
+                msg = "Winner is: Player ";
+                msg += m_activePlayers[0].ID + 1;
+
+            }
+            m_infoText.text = msg;
+            StartCoroutine(MakeActionWithDelay(OnNewGameStarted, 5));
+            return;
+        }
+        //check if end round
+        if (IsRoundEnded())
+        {
+            StartCoroutine(MakeActionWithDelay(RespawnPlayersAndStartGame, 3));
+        }
+
+
+    }
+    private bool IsRoundEnded()
+    {
+        int alivePlayers = 0;
+        for(int i = 0; i < m_activePlayers.Count; i++)
+        {
+            if(m_activePlayers[i].playerPawn != null)
+            {
+                alivePlayers++;
+            }    
+        }
+        return alivePlayers < 2;
+    }
+    private bool IsGameEnded()
+    {
+        if (m_activePlayers.Count < 2)
+        {
+            
+            return true;
+        }
+        return false;
+    }
+
+    private void RemovePlayerHP(ActivePlayer player)
+    {
+        if (!player.playerUi.LowerHpCount())
+        {
+            m_activePlayers.Remove(player);
+           
+        }
+    }
+
     void Start()
+    {
+        OnNewGameStarted();
+    }
+
+    private void OnNewGameStarted()
     {
         HidePlayersUi();
         m_respawnMenu.SetActive(true);
         m_gameUI.SetActive(false);
         m_level.SetActive(false);
+        m_infoText.fontSize = 52;
         m_infoText.text = "";
+
+        ClearActivePlayersList();
+        DestroyAllArrows();
+        SpawnManager.instance.PrepareForPlayersToJoin();
+    }
+
+    private static void DestroyAllArrows()
+    {
+        var arrows = GameObject.FindGameObjectsWithTag("Arrow");
+        foreach (GameObject arrow in arrows)
+        {
+            Destroy(arrow);
+        }
+    }
+
+    public void ClearActivePlayersList()
+    {
+        for (int i = 0; i < m_activePlayers.Count; i++)
+        {
+            if (m_activePlayers[i].playerPawn != null)
+            {
+                m_activePlayers[i].playerPawn.GetComponent<PlayerMove>().RemoveBindings();
+                Destroy(m_activePlayers[i].playerPawn);
+            }
+            m_activePlayers.RemoveAt(i);
+        }
     }
 
     private void HidePlayersUi()
@@ -95,9 +196,15 @@ public class GameState : UsingOnUpdateBase
         m_gameUI.SetActive(true);
         m_level.SetActive(true);
 
+
+        RespawnPlayersAndStartGame();
+    }
+
+    private void RespawnPlayersAndStartGame()
+    {
+        DestroyAllArrows(); 
         SpawnManager.instance.RespawnPlayers();
         SetupActivePlayersUI();
-
         PauseGameBeforeStart();
     }
 
@@ -108,7 +215,7 @@ public class GameState : UsingOnUpdateBase
         StartCoroutine(MakeActionInFixedTimesWithDelay(() => Countdown(ref startingValue), startingValue + 1, 1f));
     }
 
-    private void SetupActivePlayersUI()
+    public void SetupActivePlayersUI()
     {
         for(int i =0; i< m_activePlayers.Count; i++)
         {

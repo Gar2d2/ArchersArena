@@ -38,13 +38,19 @@ public class SpawnManager : MonoBehaviour
         var activePlayersCopy = m_GS.GetActivePlayers();
         for(int i =0; i< activePlayersCopy.Count; i++)
         {
+            if (activePlayersCopy[i].playerPawn!= null)
+            {
+                activePlayersCopy[i].playerPawn.GetComponent<PlayerMove>().RemoveBindings();
+                Destroy(activePlayersCopy[i].playerPawn);
+            }
+
             var player = Instantiate(m_playerPrefab, GetNextSpawnPointPosition(), Quaternion.identity);
             m_GS.SetPlayerPawn(activePlayersCopy[i].ID, player);
 
             var moveComp = player.GetComponent<PlayerMove>();
             if (moveComp)
             {
-                moveComp.playerID = activePlayersCopy[i].ID;
+                moveComp.m_playerID = activePlayersCopy[i].ID;
                 if(activePlayersCopy[i].gamepad != null)
                 {
                     moveComp.m_playerGamepad = activePlayersCopy[i].gamepad;
@@ -61,6 +67,11 @@ public class SpawnManager : MonoBehaviour
     void Start()
     {
         m_GS = GameState.instance;
+        //BindDevicesAndHideImages();
+    }
+
+    public void PrepareForPlayersToJoin()
+    {
         foreach (var image in m_PlayerImages)
         {
             image.SetActive(false);

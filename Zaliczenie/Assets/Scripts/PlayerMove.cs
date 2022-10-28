@@ -33,7 +33,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     [SerializeField]
     private float m_jumpForce = 0.1f;
 
-    public int playerID {get;set;}
+    public int m_playerID {get;set;}
 
     public GameObject m_playerColorTriangle;
 
@@ -150,14 +150,11 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     }
     private void MapMouseAndKeyboard()
     {
-        //var action = new InputAction(binding: m_playerGamepad.aButton.ToString());
-        //var keyboardName = m_playerKeyboard.name + "/";
-        //m_jumpAction = new InputAction(binding: keyboardName + m_playerKeyboard.spaceKey.name);
         m_jumpAction.AddBinding(m_playerKeyboard.spaceKey);
         m_jumpAction.performed +=Jump;
         m_jumpAction.Enable();
 
-        m_walkingAction.AddCompositeBinding("2DVector") // Or "Dpad"
+        m_walkingAction.AddCompositeBinding("2DVector") 
                 .With("Up", "<Keyboard>/w")
                 .With("Down", "<Keyboard>/s")
                 .With("Left", "<Keyboard>/a")
@@ -332,15 +329,17 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         {
             return;
         }
+       
         m_bIsAlive = false;
         m_Animator.SetTrigger("tDeath");
+        //m_Animator.SetBool("bIsAlive", false); 
         m_bCanShoot = false;
         m_renderer.flipX = m_renderer.flipX ? false : true;
         AddActionOnUpdate(() => m_rigidbody.velocity = new Vector2(0f, 0f));
         RemoveBindings();
     }
 
-    private void RemoveBindings()
+    public void RemoveBindings()
     {
         m_jumpAction.ChangeBinding(0).Erase();
         m_aimingAction.ChangeBinding(0).Erase();
@@ -349,7 +348,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
 
     void OnDeath()
     {
-        Destroy(this.gameObject);
+        GameState.instance.OnPlayerDeath(m_playerID);
     }
     void IncreaseArrowCount()
     {
