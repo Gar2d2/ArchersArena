@@ -37,6 +37,7 @@ public class ProjectileBase : UsingOnUpdateBase
             if(killable != null)
             {
                 killable.OnHitted();
+                bCanBePickedUp = true;
                 return;
 
             }

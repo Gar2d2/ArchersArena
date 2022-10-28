@@ -153,6 +153,10 @@ public class GameState : UsingOnUpdateBase
 
         ClearActivePlayersList();
         DestroyAllArrows();
+        foreach(var ui in playerID_displayUI)
+        {
+            ui.GetComponent<PlayerUiAccessor>().ResetHp();
+        }
         SpawnManager.instance.PrepareForPlayersToJoin();
     }
 
@@ -188,7 +192,7 @@ public class GameState : UsingOnUpdateBase
 
     public void StartGame()
     {
-        if (m_activePlayers.Count == 0)
+        if (m_activePlayers.Count <2)
         {
             return;
         }
@@ -225,6 +229,7 @@ public class GameState : UsingOnUpdateBase
             }
             var playerUi = playerID_displayUI[m_activePlayers[i].ID];
             playerUi.SetActive(true);
+            
             var playerPawn = m_activePlayers[i].playerPawn.GetComponent<PlayerMove>();
             if (playerPawn)
             {
@@ -232,6 +237,7 @@ public class GameState : UsingOnUpdateBase
             }
             ActivePlayer temp = m_activePlayers[i];
             temp.playerUi = playerUi.gameObject.GetComponent<PlayerUiAccessor>();
+
             m_activePlayers[i] = temp;
 
         }
