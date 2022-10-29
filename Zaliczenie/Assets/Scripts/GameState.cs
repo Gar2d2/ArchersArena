@@ -202,7 +202,7 @@ public class GameState : UsingOnUpdateBase
 
     public void StartGame()
     {
-        if (m_activePlayers.Count <2)
+        if (m_activePlayers.Count <1)
         {
             return;
         }

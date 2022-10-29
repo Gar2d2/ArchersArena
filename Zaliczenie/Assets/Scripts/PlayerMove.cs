@@ -324,11 +324,11 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         {
             return;
         }
+        m_bIsEjected = false;
         if(col.gameObject.tag == "Ground")
         {
             m_bIsJumping = false;
             m_Animator.SetBool("bIsJumping", false);
-            m_bIsEjected = false;
             m_walkingAction.Enable();
         }
     }

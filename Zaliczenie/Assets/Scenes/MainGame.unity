@@ -1075,7 +1075,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1096736212324922745, guid: bfeb1478068e9f54c8f62481a2c3ba2f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3
+      value: -2.6899998
       objectReference: {fileID: 0}
     - target: {fileID: 1096736212324922745, guid: bfeb1478068e9f54c8f62481a2c3ba2f, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1738,7 +1738,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2448246789088808092, guid: a2e7eb3144590444f8cb254203dd3431, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.5300002
+      value: -3.22
       objectReference: {fileID: 0}
     - target: {fileID: 2448246789088808092, guid: a2e7eb3144590444f8cb254203dd3431, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2249,6 +2249,34 @@ PrefabInstance:
       propertyPath: m_levelsObjects
       value: 
       objectReference: {fileID: 591127909}
+    - target: {fileID: 1441384786859999849, guid: cf638566bb2836244aeb2b2e1fdaf0b7, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1920
+      objectReference: {fileID: 0}
+    - target: {fileID: 1441384786859999849, guid: cf638566bb2836244aeb2b2e1fdaf0b7, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 150.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1441384786859999849, guid: cf638566bb2836244aeb2b2e1fdaf0b7, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -24.381
+      objectReference: {fileID: 0}
+    - target: {fileID: 1441384786859999850, guid: cf638566bb2836244aeb2b2e1fdaf0b7, type: 3}
+      propertyPath: m_margin.x
+      value: 0.000061035156
+      objectReference: {fileID: 0}
+    - target: {fileID: 1441384786859999850, guid: cf638566bb2836244aeb2b2e1fdaf0b7, type: 3}
+      propertyPath: m_margin.z
+      value: 0.63861084
+      objectReference: {fileID: 0}
+    - target: {fileID: 1441384786859999850, guid: cf638566bb2836244aeb2b2e1fdaf0b7, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
+      objectReference: {fileID: 0}
+    - target: {fileID: 1441384786859999850, guid: cf638566bb2836244aeb2b2e1fdaf0b7, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cf638566bb2836244aeb2b2e1fdaf0b7, type: 3}
 --- !u!1001 &1921747583411592080
