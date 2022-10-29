@@ -139,8 +139,14 @@ public class GameState : UsingOnUpdateBase
 
     void Start()
     {
+        var quitToMenu = new InputAction("QuitToMenu");
+        quitToMenu.AddBinding(Keyboard.current.escapeKey);
+        quitToMenu.performed += _ => QuitGame();
+        quitToMenu.Enable();
+
         OnNewGameStarted();
     }
+
 
     private void OnNewGameStarted()
     {
@@ -160,6 +166,10 @@ public class GameState : UsingOnUpdateBase
         SpawnManager.instance.PrepareForPlayersToJoin();
     }
 
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
     private static void DestroyAllArrows()
     {
         var arrows = GameObject.FindGameObjectsWithTag("Arrow");

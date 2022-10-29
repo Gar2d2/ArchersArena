@@ -130,6 +130,7 @@ MonoBehaviour:
   m_arrowsCount: 4
   m_smoothTime: 0.5
   m_playerSpeed: 5
+  m_playerSpeedGain: 50
   m_projectilePrefab: {fileID: 8637091347404238757, guid: efbdabe067db26844b536e83c3b708c6, type: 3}
   m_delayBetweenShots: 0.1
   m_jumpForce: 16
