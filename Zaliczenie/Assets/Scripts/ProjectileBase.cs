@@ -36,8 +36,8 @@ public class ProjectileBase : UsingOnUpdateBase
             var killable = col.gameObject.GetComponent<IKillable>();
             if(killable != null)
             {
-                killable.OnHitted();
                 bCanBePickedUp = true;
+                killable.OnHitted();
                 return;
 
             }

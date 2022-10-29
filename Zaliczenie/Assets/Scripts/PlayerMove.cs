@@ -9,7 +9,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 using static UnityEngine.InputSystem.InputAction;
-
+using Random = UnityEngine.Random;
+[RequireComponent(typeof(AudioSource))]
 public class PlayerMove : UsingOnUpdateBase, IKillable
 {
     private bool m_bIsJumping = false;
@@ -32,7 +33,13 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     private float m_delayBetweenShots = 0.1f;
     [SerializeField]
     private float m_jumpForce = 0.1f;
+    
 
+    [SerializeField]
+    private List<AudioClip> m_gettingDamageSound;
+
+    [SerializeField]
+    private List<AudioClip> m_jumpSounds;
     public int m_playerID {get;set;}
 
     public GameObject m_playerColorTriangle;
@@ -175,6 +182,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         {
             return;
         }
+        AudioSource.PlayClipAtPoint(m_jumpSounds[Random.Range(0, m_jumpSounds.Count - 1)], new Vector3(-m_rigidbody.position.x, 0, m_rigidbody.position.y));
         m_rigidbody.AddForce(new Vector2(0.0f, m_jumpForce), ForceMode2D.Impulse);
         m_Animator.SetBool("bIsJumping", true);
         m_bIsJumping = true;
@@ -299,7 +307,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     }
     void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.tag == "Arrow")
+        if (col.tag == "Arrow" && m_bIsAlive)
         {
             if (col.gameObject.GetComponent<ProjectileBase>().bCanBePickedUp)
             {
@@ -329,7 +337,8 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         {
             return;
         }
-       
+        var clipID = Random.Range(0, m_gettingDamageSound.Count - 1);
+        AudioSource.PlayClipAtPoint(m_gettingDamageSound[clipID], new Vector3(-m_rigidbody.position.x, 0, m_rigidbody.position.y));
         m_bIsAlive = false;
         m_Animator.SetTrigger("tDeath");
         //m_Animator.SetBool("bIsAlive", false); 
