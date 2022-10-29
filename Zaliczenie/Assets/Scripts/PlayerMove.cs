@@ -37,6 +37,10 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
 
     [SerializeField]
     private List<AudioClip> m_gettingDamageSound;
+    [SerializeField]
+    private AudioClip m_pickupArrowSound;
+    [SerializeField]
+    private AudioClip m_fireBowSound;
 
     [SerializeField]
     private List<AudioClip> m_jumpSounds;
@@ -273,6 +277,8 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
 
     private void Fire(ProjectileBase projectileComp)
     {
+        //fire sound
+        PlayAudio(m_fireBowSound);
         LowerArrowCount();
         m_bCanShoot = false;
         m_renderer.flipX = m_indicatorArrow.transform.up.x > 0 ? true : false;
@@ -311,6 +317,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         {
             if (col.gameObject.GetComponent<ProjectileBase>().bCanBePickedUp)
             {
+                PlayAudio(m_pickupArrowSound);
                 Destroy(col.gameObject);
                 IncreaseArrowCount();
             }
@@ -389,7 +396,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
     private void IndicatorFollowRightStick()
     {
         var gamepadVal = m_playerGamepad.rightStick.ReadValue();
-        if(gamepadVal.magnitude < 0.3)
+        if(gamepadVal.magnitude < 0.5)
         {
             RenderArrow(false);
             return;
@@ -397,5 +404,13 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         RenderArrow(true);
         gamepadVal.Normalize();
         m_indicatorArrow.transform.up = gamepadVal;
+    }
+    private void PlayAudio(AudioClip audio)
+    {
+        if (audio != null)
+        {
+            AudioSource.PlayClipAtPoint(audio, new Vector3(-m_rigidbody.position.x, 0, m_rigidbody.position.y));
+        }
+
     }
 }

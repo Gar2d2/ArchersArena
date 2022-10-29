@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-
+[RequireComponent(typeof(AudioSource))]
 public class ProjectileBase : UsingOnUpdateBase
 {
     public bool bCanBePickedUp = false;
@@ -12,6 +12,10 @@ public class ProjectileBase : UsingOnUpdateBase
     
     [SerializeField]
     float m_maxVelocity = 20f;
+    [SerializeField]
+    AudioClip m_arrowGrassHit;
+    [SerializeField]
+    AudioClip m_playerHit;
     GameObject m_owner;
     public void FireAtDirection(Vector2 direction, float velocity, GameObject owner)
     {
@@ -27,6 +31,7 @@ public class ProjectileBase : UsingOnUpdateBase
     {
         if (col.gameObject.tag == "Arrow")
         {
+            PlayAudio(m_arrowGrassHit);
             bCanBePickedUp = true;
             m_rigidbody.velocity = new Vector2(0, 0);
             return;
@@ -36,16 +41,26 @@ public class ProjectileBase : UsingOnUpdateBase
             var killable = col.gameObject.GetComponent<IKillable>();
             if(killable != null)
             {
+                PlayAudio(m_playerHit);
                 bCanBePickedUp = true;
                 killable.OnHitted();
                 return;
 
             }
         }
+        PlayAudio(m_arrowGrassHit);
         m_rigidbody.freezeRotation = true;
         m_rigidbody.isKinematic = true;
         bCanBePickedUp = true;
         GetComponent<Collider2D>().isTrigger = true;
+
+    }
+    private void PlayAudio(AudioClip audio)
+    {
+        if(audio != null)
+        {
+            AudioSource.PlayClipAtPoint(audio, new Vector3(-m_rigidbody.position.x, 0, m_rigidbody.position.y));
+        }
 
     }
 }

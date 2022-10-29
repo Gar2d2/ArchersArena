@@ -137,6 +137,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: bbb83d095538fec40a7473f5ad65d250, type: 3}
   - {fileID: 8300000, guid: 2e54641bba198994aa2213d7043428e4, type: 3}
   - {fileID: 8300000, guid: cf7edaa849e348c4abe766968f7bc957, type: 3}
+  m_pickupArrowSound: {fileID: 8300000, guid: 1a873fc0ad3e9164dafe6d40dc6ef4d5, type: 3}
+  m_fireBowSound: {fileID: 8300000, guid: 31e669bfdfece4a47abbd8aec0582366, type: 3}
   m_jumpSounds:
   - {fileID: 8300000, guid: 7cdb0a680c72b17459a97fe0e7c322d2, type: 3}
   - {fileID: 8300000, guid: 306800e4ed985614c88273e9822f239b, type: 3}
