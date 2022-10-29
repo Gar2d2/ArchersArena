@@ -1,13 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.VisualScripting;
-using UnityEditor.U2D.Path.GUIFramework;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
 using static UnityEngine.InputSystem.InputAction;
 using Random = UnityEngine.Random;
 [RequireComponent(typeof(AudioSource))]
@@ -129,6 +123,7 @@ public class PlayerMove : UsingOnUpdateBase, IKillable
         m_walkingAction.Enable();
 
         m_aimingAction.Enable();
+        AddActionOnUpdate(StopWalking);
     }
 
     private void SetupQuiver()
