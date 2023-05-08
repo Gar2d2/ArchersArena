@@ -64,7 +64,7 @@ In order to shoot, player needs to have at least one arrow in the quiver, if doe
 Apart from the basic movement which is moving left, right and jumping, player can use jumping platforms to enhance his movement. After stepping on one of those platforms, player will be ejected in the direction platform is pointing. Its worth to mention that same will happen with arrow so ricochets kills are possible.
 
 ## Ending game
-Each player have fixed amount of health, indicated by his own widget in the top part of the screen
+Each player have fixed amount of health, indicated by his own widget in the top part of the screen.
 ![image](https://user-images.githubusercontent.com/56792313/236648417-812d28fe-8b14-496a-afdd-b20372267abd.png)
 
-when player dies, he looses a heart. When only one player is alive, round ends. At the beginning of the next round all players with at least one life left gets respawned. When only one player can be respawned, game ends and the winner is determinated.
+When player dies, he looses a heart. When only one player is alive, round ends. At the beginning of the next round all players with at least one life left gets respawned. When only one player can be respawned, game ends and the winner is determinated.
