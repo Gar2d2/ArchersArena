@@ -13,14 +13,14 @@
 4. [Ending game](#ending-game)
 ## Project about:
 This game is a 2D single screen multiplayer game that can be played with up to 4 friends on 4 different devices.
-Game is splitted between rounds, round ends when there is only one player alive. Each player have four lives, game ends when there is only one player with lives left.
-There is possibility to join game alone, but its only for previev purposes, game requires at least two players playing on two different controllers (can be played on mouse and keyboard)
+The game is split between rounds, round ends when there is only one player alive. Each player have four lives, game ends when there is only one player with lives left.
+There is possibility to join game alone, but it's only for preview purposes, game requires at least two players playing on two different controllers (can be played on mouse and keyboard)
 ![image](https://user-images.githubusercontent.com/56792313/236643562-6fc5ee2a-914e-4ddb-9e6e-2e558044f7e0.png)
 
 
 ## Main menu
 
-The Main menu is first what we can see when we launch this game. While in menu, players with connected controllers (needs to be connected before lunching game)
+The Main menu is first what we can see when we launch this game. While in menu, players with connected controllers (needs to be connected before launching game)
 can press A to join, player that uses mouse and keyboard needs to press spacebar in the same purpose.
 After pressing mentioned buttons, square with color and player indicator should appear in the middle of the screen.
 When players are connected (in this case four of them), screen in menu should look like this:
@@ -34,11 +34,11 @@ A and D - Walk,
 
 Spacebar - Jump,
 
-Hold left mouse button - Start aiming,
+Hold the left mouse button - Start aiming,
 
 Mouse - Aim,
 
-Release left mouse button - Release arrow
+Release the left mouse button - Release arrow
 
 
 #### Gamepad
@@ -54,17 +54,17 @@ Release right trigger - Release arrow
 
 ## Mechanics
 #### Shooting
-The main ability, or at least the one which provides victory is the ability to shoot arrows. After pressing fire button, the red indicating arrow will apear. This indicator shows in which direction arrow will fly after releasing the fire button.
+The main ability, or at least the one which provides victory is the ability to shoot arrows. After pressing fire button, the red indicating arrow will appear. This indicator shows in which direction arrow will fly after releasing the fire button.
 
 ![image](https://user-images.githubusercontent.com/56792313/236648178-dbe1c0b4-e636-44d1-b798-c438d43b764d.png)
 
-In order to shoot, player needs to have at least one arrow in the quiver, if doesn't, nothing will happen. Arrows are deadly only before hitting the first target other than jumping platform, after that, they can be picked to a player quiver simply by colliding with them
+In order to shoot, player needs to have at least one arrow in the quiver, if it doesn't, nothing will happen. Arrows are deadly only before hitting the first target other than a jumping platform, after that, they can be picked to a player quiver simply by colliding with them
 
 #### Moving 
-Apart from the basic movement which is moving left, right and jumping, player can use jumping platforms to enhance his movement. After stepping on one of those platforms, player will be ejected in the direction platform is pointing. Its worth to mention that same will happen with arrow so ricochets kills are possible.
+Apart from the basic movement which is moving left, right and jumping, player can use jumping platforms to enhance his movement. After stepping on one of these platforms, player will be ejected in the direction platform is pointing. It's worth mentioning that same will happen with arrow so ricochets kills are possible.
 
 ## Ending game
 Each player have fixed amount of health, indicated by his own widget in the top part of the screen.
 ![image](https://user-images.githubusercontent.com/56792313/236648417-812d28fe-8b14-496a-afdd-b20372267abd.png)
 
-When player dies, he looses a heart. When only one player is alive, round ends. At the beginning of the next round all players with at least one life left gets respawned. When only one player can be respawned, game ends and the winner is determinated.
+When player dies, he loses a heart. When only one player is alive, round ends. At the beginning of the next round all players with at least one life left gets respawned. When only one player can be respawned, game ends and the winner is determined.
